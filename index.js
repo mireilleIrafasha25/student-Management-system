@@ -1,23 +1,26 @@
-import dotenv from 'dotenv'
-dotenv.config()
-import express from 'express'
-import mongoose from 'mongoose'
+const express=require('express')
+const mongoose=require('mongoose')
+const morgan=require('morgan')
+const bodyParser=require('body-parser')
 const app=express()
-app.use(express.json())
-const db_connection_string=process.env.MONGOODB_URL
+const studentroute=require('./routes/student')
+mongoose.connect('mongodb://localhost:27017')
+const db=mongoose.connection
+
+db.on('error',(err)=>
+{
+    console.log(err)
+})
+db.once('open',()=>
+{
+    console.log('Database connection Established')
+})
+app.use(morgan('dev'))
+app.use(bodyParser.urlencoded({extended:true}))
+app.use(bodyParser.json())
 const PORT=process.env.PORT || 3000
-mongoose.connect(db_connection_string)
-.then(()=>
-    {
-console.log("connected to Database succefully")
 app.listen(PORT,()=>
 {
-    console.log(`server running on port ${PORT}`)
+    console.log( `server running on port ${PORT}`)
 })
-    }
-)
-.catch(err=>
-    {
-        console.log(err)
-    })
-
+app.use('/api/student',studentroute)
